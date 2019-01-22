@@ -3,8 +3,11 @@
 #include "ball.h"
 #include "coins.h"
 #include "magnet.h"
+#include "fireline60.h"
 #include "sfo.h"
-#include "firebeams.h"
+#include "fireline.h"
+#include "fireline120.h"
+#include "firebeam.h"
 #include <stdlib.h>
 #include <stdio.h>
 using namespace std;
@@ -23,6 +26,9 @@ Coins doublecoins[4];
 Magnet magnet;
 Sfo Sfo1;
 Firebeam Firebeam1;
+Firebeam60 fireline601;
+Firebeam120 fireline1201;
+doubleFirebeam doublebeam;
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
 float camera_rotation_angle = 0;
 float pointx = 0;
@@ -86,6 +92,9 @@ void draw() {
     // ball2.draw(VP);
     Sfo1.draw(VP);
     Firebeam1.draw(VP);
+    fireline601.draw(VP);
+    fireline1201.draw(VP);
+    doublebeam.draw(VP);
 }
 
 bool detect_collision(bounding_box_t a, bounding_box_t b) {
@@ -100,16 +109,16 @@ void tick_input(GLFWwindow *window) {
     int left  = glfwGetKey(window, GLFW_KEY_LEFT);
     int right = glfwGetKey(window, GLFW_KEY_RIGHT);
     int top   = glfwGetKey(window, GLFW_KEY_UP);
-    int bottom= glfwGetKey(window, GLFW_KEY_DOWN);
+    // int bottom= glfwGetKey(window, GLFW_KEY_DOWN);
     if (left) {
         // Do something
-        ball1.position.x -= 0.02;
-        pointx -= 0.02;
+        ball1.position.x -= 0.04;
+        pointx -= 0.04;
     }
     if (right) {
 
-      ball1.position.x += 0.02;// change the ball's position so that it stays still but the rest is moving
-      pointx += 0.02;//change the point you are looking
+      ball1.position.x += 0.04;// change the ball's position so that it stays still but the rest is moving
+      pointx += 0.04;//change the point you are looking
     }
     if (top) {
       if (ball1.position.y < 2)
@@ -149,6 +158,9 @@ void tick_elements() {
     {
       doublecoins[i].tick();
     }
+    fireline601.tick();
+    fireline1201.tick();
+    doublebeam.tick();
     camera_rotation_angle += 1;
     for (int i=0; i<4; i++)
     {
@@ -193,7 +205,18 @@ void tick_elements() {
     {
       Sfo1.set_position(-100, -100);
     }
-    // if (det)
+    if (detect_collision(ball1.bounding_box(),fireline1201.bounding_box()))
+    {
+      fireline1201.set_position(-100, -100);
+    }
+    if (detect_collision(ball1.bounding_box(),fireline601.bounding_box()))
+    {
+      fireline601.set_position(-100, -100);
+    }
+    if (detect_collision(ball1.bounding_box(),doublebeam.bounding_box()))
+    {
+      doublebeam.set_position(-100, -100);
+    }
 }
 
 /* Initialize the OpenGL rendering properties */
@@ -221,6 +244,9 @@ void initGL(GLFWwindow *window, int width, int height) {
     // ball2.speed *= -1;
     Sfo1 = Sfo(7, 3, COLOR_WHITE);
     Firebeam1 = Firebeam (13, -3, COLOR_RED);
+    fireline601 = Firebeam60 ( 15, -1, COLOR_RED);
+    fireline1201 = Firebeam120 ( 17, -1, COLOR_RED);
+    doublebeam = doubleFirebeam ( 20, -1, COLOR_RED);
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
     // Get a handle for our "MVP" uniform

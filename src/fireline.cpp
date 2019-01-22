@@ -1,4 +1,4 @@
-#include "firebeams.h"
+#include "fireline.h"
 #include "main.h"
 
 Firebeam::Firebeam(float x, float y, color_t color) {
