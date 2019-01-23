@@ -10,6 +10,7 @@
 #include "firebeam.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 using namespace std;
 
 GLMatrices Matrices;
@@ -92,7 +93,7 @@ void draw() {
     // ball2.draw(VP);
     Sfo1.draw(VP);
     Firebeam1.draw(VP);
-    fireline601.draw(VP);
+    // fireline601.draw(VP);
     fireline1201.draw(VP);
     doublebeam.draw(VP);
 }
@@ -121,14 +122,14 @@ void tick_input(GLFWwindow *window) {
       pointx += 0.04;//change the point you are looking
     }
     if (top) {
-      if (ball1.position.y < 2)
+      if (ball1.position.y < 3)
       {
           ball1.position.y += 0.04;
       }
     }
     else if (!under_magnet_influence(ball1.bounding_box(),magnet.bounding_box()))
     {
-      if (ball1.position.y >= -2.5)
+      if (ball1.position.y >= -3.0)
       {
           ball1.position.y -= 0.04;
       }
@@ -167,6 +168,7 @@ void tick_elements() {
       if(detect_collision(ball1.bounding_box(),coins[i].bounding_box())) // coins yellow
       {
         coins[i].set_position(-100,-100);
+        ball1.score += 5;
       }
     }
     for (int i=0; i<4; i++)
@@ -174,6 +176,7 @@ void tick_elements() {
       if(detect_collision(ball1.bounding_box(),doublecoins[i].bounding_box())) // coins red
       {
         doublecoins[i].set_position(-100,-100);
+        ball1.score += 10;
       }
     }
     if(under_magnet_influence(ball1.bounding_box(),magnet.bounding_box())) // magnet
@@ -204,22 +207,55 @@ void tick_elements() {
     if (detect_collision(ball1.bounding_box(),Sfo1.bounding_box()))
     {
       Sfo1.set_position(-100, -100);
+      ball1.score += 50;
     }
     if (detect_collision(ball1.bounding_box(),fireline1201.bounding_box()))
     {
-      fireline1201.set_position(-100, -100);
+      if ( ball1.position.x < 17 && ball1.position.y < -1.48 && ball1.position.x > 16.4 ) { // down 1
+        // Do nothing
+      }
+      else if ( ball1.position.x < 16.4 && ball1.position.y < -1.40 && ball1.position.x > 15.9 ) { // down 1
+        // Do nothing
+      }
+      else if ( ball1.position.x > 17.8 && ball1.position.y > 0.65 && ball1.position.x < 18.4 ) {
+
+      }
+      else if ( ball1.position.x > 18.4 && ball1.position.y > 0.60 && ball1.position.x < 19) {
+
+      }
+      else {
+        fireline1201.set_position(-100, -100);
+        printf("Dead2\n");
+        ball1.lives--;
+      }
+
     }
     if (detect_collision(ball1.bounding_box(),fireline601.bounding_box()))
     {
-      fireline601.set_position(-100, -100);
+      if (ball1.position.x > 14 && ball1.position.y > 0.19 && ball1.position.x < 15.2) {
+        // Do Nothing
+      }
+      else if(ball1.position.x > 15.8 && ball1.position.y < -1.50 && ball1.position.x < 16.2 ) { // down1
+        // Do Nothing
+      }
+      else if(ball1.position.x > 16.2 && ball1.position.y < -1.42 && ball1.position.x < 17 ) { // down2
+        // Do Nothing
+      }
+      else {
+        fireline601.set_position(-100, -100);
+        printf("Dead\n");
+        ball1.lives--;
+      }
     }
     if (detect_collision(ball1.bounding_box(),doublebeam.bounding_box()))
     {
       doublebeam.set_position(-100, -100);
+      ball1.lives--;
     }
     if (detect_collision(ball1.bounding_box(),Firebeam1.bounding_box()))
     {
       Firebeam1.set_position(-100, -100);
+      ball1.lives--;
     }
 }
 
@@ -229,7 +265,7 @@ void initGL(GLFWwindow *window, int width, int height) {
     /* Objects should be created before any other gl function and shaders */
     // Create the models
     int ycordcoin = createrandforcoin();
-    ball1       = Ball(0, -2, COLOR_ORANGE);
+    ball1         = Ball(0, -2, COLOR_ORANGE);
     int start = -2;
     int doublestart = 8;
     for (int i=0; i<4; i++)
@@ -297,10 +333,17 @@ int main(int argc, char **argv) {
             draw();
             // pointx += 0.005;
             // Swap Frame Buffer in double buffering
+            if (ball1.lives == -1)
+            {
+              break;
+            }
+            char stingy[100];
+            sprintf(stingy,"Score is %d and lives left is %d",ball1.score,ball1.lives);
             glfwSwapBuffers(window);
-
+            glfwSetWindowTitle(window,stingy);
             tick_elements();
             tick_input(window);
+            printf("%f %f\n", ball1.position.x, ball1.position.y);
         }
         /*if (detect_collision(ball1, ball2))
         {

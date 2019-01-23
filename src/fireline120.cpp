@@ -56,11 +56,11 @@ void Firebeam120::tick() {
 }
 
 bounding_box_t Firebeam120::bounding_box() {
-  float x = this->position.x;
-  float y = this->position.y;
+  float x = this->position.x + 0.5;
+  float y = this->position.y + 0.5;
   bounding_box_t Firebeambox120 =
   {
-    x, y, 0.75, 1.5,
+    x, y, 1.00, 1.00,
   };
   return Firebeambox120;
 }
