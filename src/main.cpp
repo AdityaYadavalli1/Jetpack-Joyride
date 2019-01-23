@@ -93,7 +93,7 @@ void draw() {
     // ball2.draw(VP);
     Sfo1.draw(VP);
     Firebeam1.draw(VP);
-    // fireline601.draw(VP);
+    fireline601.draw(VP);
     fireline1201.draw(VP);
     doublebeam.draw(VP);
 }
@@ -211,16 +211,22 @@ void tick_elements() {
     }
     if (detect_collision(ball1.bounding_box(),fireline1201.bounding_box()))
     {
-      if ( ball1.position.x < 17 && ball1.position.y < -1.48 && ball1.position.x > 16.4 ) { // down 1
+      if ( ball1.position.x < 25.3 && ball1.position.y < -1.20 && ball1.position.x > 24.75 ) { // down 1 25 -1.5
         // Do nothing
       }
-      else if ( ball1.position.x < 16.4 && ball1.position.y < -1.40 && ball1.position.x > 15.9 ) { // down 1
+      else if ( ball1.position.x <= 24.75 && ball1.position.y < -0.90 && ball1.position.x > 24.25 ) { // down 1 25 -1.5
         // Do nothing
       }
-      else if ( ball1.position.x > 17.8 && ball1.position.y > 0.65 && ball1.position.x < 18.4 ) {
+      else if ( ball1.position.x <= 24.25 && ball1.position.y < -0.65 && ball1.position.x > 23.75 ) { // down 1 25 -1.5
+        // Do nothing
+      }
+      else if ( ball1.position.x <= 23.75 && ball1.position.y < -0.10 && ball1.position.x > 22.75 ) { // down 1 25 -1.5
+        // Do nothing
+      }
+      else if ( ball1.position.x > 25.3 && ball1.position.y > 1.65 && ball1.position.x < 26.6 ) {
 
       }
-      else if ( ball1.position.x > 18.4 && ball1.position.y > 0.60 && ball1.position.x < 19) {
+      else if ( ball1.position.x >= 26.6 && ball1.position.y > 1.20 && ball1.position.x < 27.5) {
 
       }
       else {
@@ -232,18 +238,18 @@ void tick_elements() {
     }
     if (detect_collision(ball1.bounding_box(),fireline601.bounding_box()))
     {
-      if (ball1.position.x > 14 && ball1.position.y > 0.19 && ball1.position.x < 15.2) {
+      if (ball1.position.x > 14 && ball1.position.y > 0.22 && ball1.position.x < 15.2) {
         // Do Nothing
       }
       else if(ball1.position.x > 15.8 && ball1.position.y < -1.50 && ball1.position.x < 16.2 ) { // down1
         // Do Nothing
       }
-      else if(ball1.position.x > 16.2 && ball1.position.y < -1.42 && ball1.position.x < 17 ) { // down2
+      else if(ball1.position.x > 16.2 && ball1.position.y < -1.25 && ball1.position.x < 17.6 ) { // down2
         // Do Nothing
       }
       else {
         fireline601.set_position(-100, -100);
-        printf("Dead\n");
+        // printf("Dead\n");
         ball1.lives--;
       }
     }
@@ -285,7 +291,7 @@ void initGL(GLFWwindow *window, int width, int height) {
     Sfo1 = Sfo(7, 3, COLOR_WHITE);
     Firebeam1 = Firebeam (13, -3, COLOR_RED);
     fireline601 = Firebeam60 ( 15, -1, COLOR_RED);
-    fireline1201 = Firebeam120 ( 17, -1, COLOR_RED);
+    fireline1201 = Firebeam120 ( 24, -1, COLOR_RED);
     doublebeam = doubleFirebeam ( 20, -1, COLOR_RED);
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
