@@ -217,6 +217,10 @@ void tick_elements() {
     {
       doublebeam.set_position(-100, -100);
     }
+    if (detect_collision(ball1.bounding_box(),Firebeam1.bounding_box()))
+    {
+      Firebeam1.set_position(-100, -100);
+    }
 }
 
 /* Initialize the OpenGL rendering properties */

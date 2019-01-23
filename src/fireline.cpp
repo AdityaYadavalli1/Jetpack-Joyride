@@ -82,11 +82,12 @@ Firebeam::Firebeam(float x, float y, color_t color) {
 
 void Firebeam::draw(glm::mat4 VP) {
     Matrices.model = glm::mat4(1.0f);
-    glm::mat4 translate = glm::translate (this->position);    // glTranslatef
+    glm::mat4 translate = glm::translate (this->position);
+    glm::mat4 scale = glm::scale(glm::vec3(0.5f, 0.5f ,0.5f));  // glTranslatef
     glm::mat4 rotate    = glm::rotate((float) (this->rotation * M_PI / 180.0f), glm::vec3(1, 0, 0));
     // No need as coords centered at 0, 0, 0 of cube arouund which we waant to rotate
     // rotate          = rotate * glm::translate(glm::vec3(0, -0.6, 0));
-    Matrices.model *= (translate * rotate);
+    Matrices.model *= (translate * scale);
     glm::mat4 MVP = VP * Matrices.model;
     glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
     draw3DObject(this->object);
@@ -107,7 +108,7 @@ bounding_box_t Firebeam::bounding_box() {
   float y = this->position.y;
   bounding_box_t Firebeambox =
   {
-    x, y, 0.55, 0.55,
+    x, y, 1.50, 0.50,
   };
   return Firebeambox;
 }

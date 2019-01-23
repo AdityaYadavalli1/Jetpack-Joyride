@@ -60,7 +60,7 @@ bounding_box_t Firebeam60::bounding_box() {
   float y = this->position.y;
   bounding_box_t Firebeambox60 =
   {
-    x, y, 0.45, 1.5,
+    x, y, 0.75, 1.5,
   };
   return Firebeambox60;
 }
