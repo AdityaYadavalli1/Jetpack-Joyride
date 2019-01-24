@@ -74,7 +74,7 @@ void doubleFirebeam::tick() {
 }
 
 bounding_box_t doubleFirebeam::bounding_box() {
-  float x = this->position.x+0.75;
+  float x = this->position.x + 0.75;
   float y = this->position.y;
   bounding_box_t doubleFirebeambox =
   {

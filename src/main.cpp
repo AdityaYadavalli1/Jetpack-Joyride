@@ -8,6 +8,7 @@
 #include "fireline.h"
 #include "fireline120.h"
 #include "firebeam.h"
+#include "platform.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -25,6 +26,7 @@ Ball ball1;
 Coins coins[4];
 Coins doublecoins[4];
 Magnet magnet;
+Platform platform;
 Sfo Sfo1;
 Firebeam Firebeam1;
 Firebeam60 fireline601;
@@ -79,6 +81,7 @@ void draw() {
 
     // Scene render
     ball1.draw(VP);
+    platform.draw(VP);
     for (int i=0; i<4; i++)
     {
       coins[i].draw(VP);
@@ -114,10 +117,11 @@ void tick_input(GLFWwindow *window) {
     if (left) {
         // Do something
         ball1.position.x -= 0.04;
+        platform.position.x -= 0.04;
         pointx -= 0.04;
     }
     if (right) {
-
+      platform.position.x += 0.04;
       ball1.position.x += 0.04;// change the ball's position so that it stays still but the rest is moving
       pointx += 0.04;//change the point you are looking
     }
@@ -196,17 +200,21 @@ void tick_elements() {
       if (magnet.position.y > ball1.position.y )
       {
         // ball1.position.y += 0.003;
+        platform.speedy += 0.001;
         ball1.speedy += 0.001;
       }
       else if (magnet.position.y < ball1.position.y )
       {
         // ball1.position.y -= 0.003;
+        platform.speedy -= 0.001;
         ball1.speedy -= 0.001;
       }
       if ( (abs(magnet.position.x - ball1.position.x)) <= magnetdisappear && (abs(magnet.position.y - ball1.position.y ) <= magnetdisappear))
       {
         ball1.speedx = 0;
         ball1.speedy = 0;
+        platform.speedy = 0;
+        platform.speedx = 0;
         magnet.set_position(-100,-100);
       }// tickcounter++;
     }
@@ -278,6 +286,7 @@ void initGL(GLFWwindow *window, int width, int height) {
     // Create the models
     int ycordcoin = createrandforcoin();
     ball1         = Ball(0, -2, COLOR_ORANGE);
+    platform      = Platform(0, -5.5, COLOR_DARKGREY);
     int start = -2;
     int doublestart = 8;
     for (int i=0; i<4; i++)
