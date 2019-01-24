@@ -9,6 +9,7 @@
 #include "fireline120.h"
 #include "firebeam.h"
 #include "platform.h"
+#include "hump.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -27,6 +28,7 @@ Coins coins[4];
 Coins doublecoins[4];
 Magnet magnet;
 Platform platform;
+Hump hump;
 Sfo Sfo1;
 Firebeam Firebeam1;
 Firebeam60 fireline601;
@@ -92,13 +94,12 @@ void draw() {
     }
     magnet.draw(VP);
     magnetdisappear = createrandformagnet();
-    // coin.draw(VP);
-    // ball2.draw(VP);
     Sfo1.draw(VP);
     Firebeam1.draw(VP);
     fireline601.draw(VP);
     fireline1201.draw(VP);
     doublebeam.draw(VP);
+    hump.draw(VP);
 }
 
 bool detect_collision(bounding_box_t a, bounding_box_t b) {
@@ -119,19 +120,53 @@ void tick_input(GLFWwindow *window) {
         ball1.position.x -= 0.04;
         platform.position.x -= 0.04;
         pointx -= 0.04;
+        if (detect_collision(ball1.bounding_box(),hump.bounding_box()))
+        {
+          if (ball1.position.x <= 8.7) {
+            ball1.position.y += 0.04;
+          }
+          if (ball1.position.x <= 8.55) {
+            ball1.position.y -= 0.01;
+          }
+          if (ball1.position.x <= 6.9) {
+            ball1.position.y -= 0.01;
+          }
+          if (ball1.position.x <= 6.3) {
+            ball1.position.y -= 0.04;
+          }
+        }
     }
     if (right) {
       platform.position.x += 0.04;
       ball1.position.x += 0.04;// change the ball's position so that it stays still but the rest is moving
       pointx += 0.04;//change the point you are looking
+      if (detect_collision(ball1.bounding_box(),hump.bounding_box()))
+      {
+        ball1.position.y += 0.04;
+        if (ball1.position.x > 4.6 && ball1.position.x < 7.5) {
+          ball1.position.y -= 0.01;
+        }
+        if (ball1.position.x >= 7.5) {
+          ball1.position.y -= 0.02;
+          // printf("LOl\n");
+        }
+        if (ball1.position.x >= 7.8 && ball1.position.y >= -3.0) {
+          ball1.position.y -= 0.04;
+          // printf("LOl\n");
+        }
+      }
     }
     if (top) {
-      if (ball1.position.y < 3)
+      if (detect_collision(ball1.bounding_box(),hump.bounding_box()))
+      {
+        // ball1.position.y += 0.04;
+      }
+      else if (ball1.position.y < 3)
       {
           ball1.position.y += 0.04;
       }
     }
-    else if (!under_magnet_influence(ball1.bounding_box(),magnet.bounding_box()))
+    else if (!under_magnet_influence(ball1.bounding_box(),magnet.bounding_box())&&!detect_collision(ball1.bounding_box(),hump.bounding_box())) // this is gravity pulling down after the magnet has pulled the player up
     {
       if (ball1.position.y >= -3.0)
       {
@@ -277,7 +312,13 @@ void tick_elements() {
       Firebeam1.set_position(-100, -100);
       ball1.lives--;
     }
+    if (detect_collision(ball1.bounding_box(),hump.bounding_box()))
+    {
+      // ball1.position.y += 0.04;
+      printf("genie\n");
+    }
 }
+
 
 /* Initialize the OpenGL rendering properties */
 /* Add all the models to be created here */
@@ -300,14 +341,12 @@ void initGL(GLFWwindow *window, int width, int height) {
       doublestart++;
     }
     magnet = Magnet(6, 2, COLOR_DARKGREY);
-    // coin        = Coins(2, ycordcoin, COLOR_YELLOW);
-    // ball2       = Ball(-2, 0, COLOR_GREEN);
-    // ball2.speed *= -1;
     Sfo1 = Sfo(4, 3, COLOR_WHITE);
     Firebeam1 = Firebeam (13, -3, COLOR_RED);
     fireline601 = Firebeam60 ( 15, -1, COLOR_RED);
     fireline1201 = Firebeam120 ( 24, -1, COLOR_RED);
     doublebeam = doubleFirebeam ( 20, -1, COLOR_RED);
+    hump = Hump(7, -3.5 , COLOR_DARKGREY);
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
     // Get a handle for our "MVP" uniform

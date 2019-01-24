@@ -1,13 +1,13 @@
-#include "coins.h"
+#include "hump.h"
 #include "main.h"
 
-Coins::Coins(float x, float y, color_t color) {
+Hump::Hump(float x, float y, color_t color) {
     this->position = glm::vec3(x, y, 0);
     this->rotation = 1;
     int n = 50;
     GLfloat vertex_buffer_data[3*3*n];
     float pi = 22 * 1.0f / 7;
-    float delta = 2* pi / n;
+    float delta = pi / n;
     float theta = 0;
     for(int i = 0;i < n;i++){
         vertex_buffer_data[9*i] = 0.0f;
@@ -26,9 +26,9 @@ Coins::Coins(float x, float y, color_t color) {
     this->object = create3DObject(GL_TRIANGLES, 50*3, vertex_buffer_data, color, GL_FILL);
 }
 
-void Coins::draw(glm::mat4 VP) {
+void Hump::draw(glm::mat4 VP) {
     Matrices.model = glm::mat4(1.0f);
-    glm::mat4 scale = glm::scale(glm::vec3(0.3f, 0.3f ,0.3f));
+    glm::mat4 scale = glm::scale(glm::vec3(2.5f, 1.0f ,0.3f));
     glm::mat4 translate = glm::translate (this->position);    // glTranslatef
     glm::mat4 rotate    = glm::rotate((float) (this->rotation * M_PI / 180.0f), glm::vec3(1, 0, 0));
     // No need as coords centered at 0, 0, 0 of cube arouund which we waant to rotate
@@ -39,21 +39,21 @@ void Coins::draw(glm::mat4 VP) {
     draw3DObject(this->object);
 }
 
-void Coins::set_position(float x, float y) {
+void Hump::set_position(float x, float y) {
     this->position = glm::vec3(x, y, 0);
 }
 
-void Coins::tick() {
+void Hump::tick() {
     // this->rotation += speed;
     // this->position.x -= speed;
     // this->position.y -= speed;
 }
-bounding_box_t Coins::bounding_box() {
+bounding_box_t Hump::bounding_box() {
   float x = this->position.x;
   float y = this->position.y;
-  bounding_box_t coinbox =
+  bounding_box_t humpbox =
   {
-    x, y, 0.2, 0.2,
+    x, y, 1.3, 0.5,
   };
-  return coinbox;
+  return humpbox;
 }
