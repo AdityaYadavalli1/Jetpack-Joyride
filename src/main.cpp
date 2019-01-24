@@ -32,6 +32,7 @@ Platform platform;
 Boomerang boomerang;
 Hump hump;
 Sfo Sfo1;
+int counter = 0;
 Firebeam Firebeam1;
 Firebeam60 fireline601;
 Firebeam120 fireline1201;
@@ -160,6 +161,7 @@ void tick_input(GLFWwindow *window) {
       }
     }
     if (top) {
+      counter = 0;
       if (detect_collision(ball1.bounding_box(),hump.bounding_box()))
       {
         // ball1.position.y += 0.04;
@@ -173,7 +175,14 @@ void tick_input(GLFWwindow *window) {
     {
       if (ball1.position.y >= -3.0)
       {
-          ball1.position.y -= 0.04;
+          counter ++;
+          ball1.position.y -= counter*0.004;
+          printf("LOL\n");
+      }
+      else
+      {
+        ball1.position.y = -3.01;
+        counter = 0;
       }
     }
 }
