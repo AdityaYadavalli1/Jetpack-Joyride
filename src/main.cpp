@@ -10,6 +10,7 @@
 #include "firebeam.h"
 #include "platform.h"
 #include "hump.h"
+#include "boomerang.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -28,6 +29,7 @@ Coins coins[4];
 Coins doublecoins[4];
 Magnet magnet;
 Platform platform;
+Boomerang boomerang;
 Hump hump;
 Sfo Sfo1;
 Firebeam Firebeam1;
@@ -36,7 +38,7 @@ Firebeam120 fireline1201;
 doubleFirebeam doublebeam;
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
 float camera_rotation_angle = 0;
-float pointx = 0;
+float pointx = -3;
 float pointy = 2;
 float zoom = 1;
 int tickcounter = 0;
@@ -100,6 +102,7 @@ void draw() {
     fireline1201.draw(VP);
     doublebeam.draw(VP);
     hump.draw(VP);
+    boomerang.draw(VP);
 }
 
 bool detect_collision(bounding_box_t a, bounding_box_t b) {
@@ -180,7 +183,7 @@ void tick_elements() {
     ball1.tick();
     magnet.tick();
     bool Sfo1Start = 0;
-    if(ball1.position.x >=3)
+    if(ball1.position.x >= -1)
     {
       Sfo1Start = 1;
     }
@@ -188,8 +191,6 @@ void tick_elements() {
     {
       Sfo1.tick();
     }
-    // ball2.tick();
-    // coin.tick();
     for (int i=0; i<4; i++)
     {
       coins[i].tick();
@@ -201,6 +202,7 @@ void tick_elements() {
     fireline601.tick();
     fireline1201.tick();
     doublebeam.tick();
+    boomerang.tick();
     camera_rotation_angle += 1;
     for (int i=0; i<4; i++)
     {
@@ -317,6 +319,20 @@ void tick_elements() {
       // ball1.position.y += 0.04;
       printf("genie\n");
     }
+    if( boomerang.position.y < -3 ) {
+      boomerang.speedx = 0;
+      boomerang.speedy = 0;
+      boomerang.accx = 0;
+      boomerang.set_position(-100,-100);
+    }
+    if (detect_collision(ball1.bounding_box(),boomerang.bounding_box()))
+    {
+      boomerang.speedx = 0;
+      boomerang.speedy = 0;
+      boomerang.accx = 0;
+      boomerang.set_position(-100,-100);
+      ball1.lives--;
+    }
 }
 
 
@@ -325,8 +341,8 @@ void tick_elements() {
 void initGL(GLFWwindow *window, int width, int height) {
     /* Objects should be created before any other gl function and shaders */
     // Create the models
-    int ycordcoin = createrandforcoin();
-    ball1         = Ball(0, -2, COLOR_ORANGE);
+    // int ycordcoin = createrandforcoin();
+    ball1         = Ball(-4, -2, COLOR_ORANGE);
     platform      = Platform(0, -5.5, COLOR_DARKGREY);
     int start = -2;
     int doublestart = 8;
@@ -347,6 +363,7 @@ void initGL(GLFWwindow *window, int width, int height) {
     fireline1201 = Firebeam120 ( 24, -1, COLOR_RED);
     doublebeam = doubleFirebeam ( 20, -1, COLOR_RED);
     hump = Hump(7, -3.5 , COLOR_DARKGREY);
+    boomerang = Boomerang(-3, 0, COLOR_RED);
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
     // Get a handle for our "MVP" uniform
