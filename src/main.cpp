@@ -46,7 +46,7 @@ int createrandforcoin() {
   return ( rand() % 4  );
 }
 int createrandformagnet() {
-  return ( rand() % 3 + 1);
+  return ( rand() % 2 + 1);
 }
 void draw() {
     // clear the color and depth in the frame buffer
@@ -103,8 +103,8 @@ bool detect_collision(bounding_box_t a, bounding_box_t b) {
            (abs((a.y) - (b.y)) * 1 < (a.height + b.height));
 }
 bool under_magnet_influence(bounding_box_t player, bounding_box_t magnet) {
-    return (abs((player.x) - (magnet.x)) < (player.width  + magnet.width)*3) &&
-           (abs((player.y) - (magnet.y)) < (player.height + magnet.height)*3);
+    return (abs((player.x) - (magnet.x)) < (player.width  + magnet.width)*5) &&
+           (abs((player.y) - (magnet.y)) < (player.height + magnet.height)*5);
 }
 void tick_input(GLFWwindow *window) {
     int left  = glfwGetKey(window, GLFW_KEY_LEFT);
@@ -183,24 +183,30 @@ void tick_elements() {
     {
       if (magnet.position.x > ball1.position.x )
       {
-        ball1.position.x += 0.003;
-        pointx += 0.003;
+        // ball1.position.x += 0.003;
+        ball1.speedx += 0.001;
+        pointx += ball1.speedx;
       }
       else if (magnet.position.x < ball1.position.x )
       {
-        ball1.position.x -= 0.003;
-        pointx -= 0.003;
+        // ball1.position.x -= 0.003;
+        ball1.speedx -= 0.001;
+        pointx -= ball1.speedx;
       }
       if (magnet.position.y > ball1.position.y )
       {
-        ball1.position.y += 0.003;
+        // ball1.position.y += 0.003;
+        ball1.speedy += 0.001;
       }
       else if (magnet.position.y < ball1.position.y )
       {
-        ball1.position.y -= 0.003;
+        // ball1.position.y -= 0.003;
+        ball1.speedy -= 0.001;
       }
       if ( (abs(magnet.position.x - ball1.position.x)) <= magnetdisappear && (abs(magnet.position.y - ball1.position.y ) <= magnetdisappear))
       {
+        ball1.speedx = 0;
+        ball1.speedy = 0;
         magnet.set_position(-100,-100);
       }// tickcounter++;
     }
@@ -284,11 +290,11 @@ void initGL(GLFWwindow *window, int width, int height) {
       doublecoins[i] = Coins(doublestart,createrandforcoin(),COLOR_DARKRED);
       doublestart++;
     }
-    magnet = Magnet(3, 2, COLOR_DARKGREY);
+    magnet = Magnet(6, 2, COLOR_DARKGREY);
     // coin        = Coins(2, ycordcoin, COLOR_YELLOW);
     // ball2       = Ball(-2, 0, COLOR_GREEN);
     // ball2.speed *= -1;
-    Sfo1 = Sfo(7, 3, COLOR_WHITE);
+    Sfo1 = Sfo(4, 3, COLOR_WHITE);
     Firebeam1 = Firebeam (13, -3, COLOR_RED);
     fireline601 = Firebeam60 ( 15, -1, COLOR_RED);
     fireline1201 = Firebeam120 ( 24, -1, COLOR_RED);

@@ -4,7 +4,8 @@
 Ball::Ball(float x, float y, color_t color) {
     this->position = glm::vec3(x, y, 0);
     this->rotation = 0;
-    speed = 0.005;
+    this->speedx = 0;
+    this->speedy = 0;
     this->score = 0;
     this->lives = 3;
     // Our vertices. Three consecutive floats give a 3D vertex; Three consecutive vertices give a triangle.
@@ -76,8 +77,8 @@ void Ball::set_position(float x, float y) {
 
 void Ball::tick() {
     // this->rotation += speed;
-    // this->position.x -= speed;
-    // this->position.y -= speed;
+    this->position.x += this->speedx;
+    this->position.y += this->speedy;
 }
 
 bounding_box_t Ball::bounding_box() {
