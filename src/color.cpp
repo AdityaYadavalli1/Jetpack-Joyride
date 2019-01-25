@@ -10,3 +10,4 @@ const color_t COLOR_DARKRED = {204, 0, 0};
 const color_t COLOR_DARKGREY = {169, 169, 169};
 const color_t COLOR_WHITE = {255, 255, 255};
 const color_t COLOR_ORANGE = {255, 165, 0};
+const color_t COLOR_BLUE = {0, 191, 255};

@@ -14,6 +14,7 @@
 #include "smarten.h"
 #include "rocket.h"
 #include "rocketRight.h"
+#include "waterballoons.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -50,6 +51,7 @@ float camera_rotation_angle = 0;
 float pointx = -3;
 float pointy = 2;
 float zoom = 1;
+Waterballoons waterballoon[2];
 int tickcounter = 0;
 int magnetdisappear = 0;
 int shoot[2] = {0};
@@ -59,6 +61,10 @@ int rocketRightCounter = -1;
 int currentRocketRight = 0;
 int shootRight[2] = {0};
 int Sfocounter = 0;
+int waterballoonActivate1 = 0;
+int waterballoonActivate2 = 0;
+int waterballooncounter1 = 0;
+int waterballooncounter2 = 0;
 // int ycordcoin = rand() % 7 - 3; // -3 to 3
 Timer t60(1.0 / 60);
 
@@ -100,6 +106,8 @@ void draw() {
     glm::mat4 MVP;  // MVP = Projection * View * Model
 
     // Scene render
+    // waterballoon[1].draw(VP);
+    waterballoon[0].draw(VP);
     ball1.draw(VP);
     platform.draw(VP);
     for (int i=0; i<4; i++)
@@ -132,13 +140,27 @@ bool detect_collision(bounding_box_t a, bounding_box_t b) {
            (abs((a.y) - (b.y)) * 1 < (a.height + b.height));
 }
 bool under_magnet_influence(bounding_box_t player, bounding_box_t magnet) {
-    return (abs((player.x) - (magnet.x)) < (player.width  + magnet.width)*5) &&
-           (abs((player.y) - (magnet.y)) < (player.height + magnet.height)*5);
+    return (abs((player.x) - (magnet.x)) < (player.width  + magnet.width)*4) &&
+           (abs((player.y) - (magnet.y)) < (player.height + magnet.height)*4);
 }
 void tick_input(GLFWwindow *window) {
     int left  = glfwGetKey(window, GLFW_KEY_LEFT);
     int right = glfwGetKey(window, GLFW_KEY_RIGHT);
     int top   = glfwGetKey(window, GLFW_KEY_UP);
+    int waterballoonshoot = glfwGetKey(window, GLFW_KEY_S);
+    if(waterballoonshoot&&waterballoonActivate2==1)
+    {
+      // waterballoonActivate2=1;
+    }
+    else if(waterballoonshoot&&waterballoonActivate1==1)
+    {
+      waterballoonActivate2=1;
+    }
+    if(waterballoonshoot&&waterballoonActivate1==0)
+    {
+      waterballoonActivate1=1;
+    }
+
     if (left) {
         // Do something
         rightcounter = 0;
@@ -341,6 +363,11 @@ void tick_elements() {
         rocketRight[i].position.y = smarten.position.y;
       }
     }
+    if(waterballoonActivate1 ==  0)
+    {
+      waterballoon[0].position.y = ball1.position.y;
+      waterballoon[0].position.x = ball1.position.x;
+    }
     for (int i=0; i<4; i++)
     {
       if(detect_collision(ball1.bounding_box(),coins[i].bounding_box())) // coins yellow
@@ -471,6 +498,21 @@ void tick_elements() {
       // ball1.position.y += 0.04;
       // printf("genie\n");
     }
+    if (detect_collision(waterballoon[0].bounding_box(),fireline601.bounding_box()))
+    {
+      waterballoon[0].set_position(-100,-100);
+      fireline601.set_position(-100,-100);
+    }
+    if (detect_collision(waterballoon[0].bounding_box(),fireline1201.bounding_box()))
+    {
+      waterballoon[0].set_position(-100,-100);
+      fireline1201.set_position(-100,-100);
+    }
+    if (detect_collision(waterballoon[0].bounding_box(),Firebeam1.bounding_box()))
+    {
+      waterballoon[0].set_position(-100,-100);
+      Firebeam1.set_position(-100,-100);
+    }
     if(boomerang.position.y < -3) {
       boomerang.speedx = 0;
       boomerang.speedy = 0;
@@ -501,8 +543,22 @@ void tick_elements() {
     {
       smarten.position.y += 0.04;
     }
+    if(waterballoonActivate1==1)// first ballon activated
+    {
+      waterballoon[0].tick();
+      waterballooncounter1 ++;
+      if(waterballoon[0].position.y > -3.5)
+      {
+        waterballoon[0].position.y -= waterballooncounter1*0.0004;//gravity
+      }
+      else
+      {
+        waterballoon[0].set_position(-100,-100);
+      }
+    }
     // cout << ball1.position.x + ',' + ball1.position.y << endl;
-    printf("%f , %f\n", ball1.position.x, ball1.position.y);
+    // printf("%f , %f\n", ball1.position.x, ball1.position.y);
+    // printf("%f ,%f\n", waterballoon[0].position.x, waterballoon[0].position.y);
 }
 
 
@@ -542,6 +598,10 @@ void initGL(GLFWwindow *window, int width, int height) {
     for(int i = 0; i<2; i++)
     {
       rocketRight[i] = RocketRight(33.25,0,COLOR_RED);
+    }
+    for(int i = 0;i<1;i++)
+    {
+      waterballoon[i] = Waterballoons(ball1.position.x, ball1.position.y, COLOR_BLUE);
     }
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
