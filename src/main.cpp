@@ -11,6 +11,9 @@
 #include "platform.h"
 #include "hump.h"
 #include "boomerang.h"
+#include "smarten.h"
+#include "rocket.h"
+#include "rocketRight.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -31,12 +34,17 @@ Magnet magnet;
 Platform platform;
 Boomerang boomerang;
 Hump hump;
+Smarten smarten;
 Sfo Sfo1;
 int counter = 0;
+int rightcounter = 0;
+int leftcounter = 0;
 Firebeam Firebeam1;
 Firebeam60 fireline601;
 Firebeam120 fireline1201;
 doubleFirebeam doublebeam;
+Rocket rocket[2];
+RocketRight rocketRight[2];
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
 float camera_rotation_angle = 0;
 float pointx = -3;
@@ -44,6 +52,13 @@ float pointy = 2;
 float zoom = 1;
 int tickcounter = 0;
 int magnetdisappear = 0;
+int shoot[2] = {0};
+int rocketCounter = -1;
+int currentRocket = 0;
+int rocketRightCounter = -1;
+int currentRocketRight = 0;
+int shootRight[2] = {0};
+int Sfocounter = 0;
 // int ycordcoin = rand() % 7 - 3; // -3 to 3
 Timer t60(1.0 / 60);
 
@@ -104,6 +119,12 @@ void draw() {
     doublebeam.draw(VP);
     hump.draw(VP);
     boomerang.draw(VP);
+    smarten.draw(VP);
+    for(int i = 0 ; i<2;i++)
+    {
+      rocket[i].draw(VP);
+      rocketRight[i].draw(VP);
+    }
 }
 
 bool detect_collision(bounding_box_t a, bounding_box_t b) {
@@ -118,9 +139,10 @@ void tick_input(GLFWwindow *window) {
     int left  = glfwGetKey(window, GLFW_KEY_LEFT);
     int right = glfwGetKey(window, GLFW_KEY_RIGHT);
     int top   = glfwGetKey(window, GLFW_KEY_UP);
-    // int bottom= glfwGetKey(window, GLFW_KEY_DOWN);
     if (left) {
         // Do something
+        rightcounter = 0;
+        leftcounter = 300;
         ball1.position.x -= 0.04;
         platform.position.x -= 0.04;
         pointx -= 0.04;
@@ -141,6 +163,8 @@ void tick_input(GLFWwindow *window) {
         }
     }
     if (right) {
+      leftcounter = 0;
+      rightcounter = 300;
       platform.position.x += 0.04;
       ball1.position.x += 0.04;// change the ball's position so that it stays still but the rest is moving
       pointx += 0.04;//change the point you are looking
@@ -152,17 +176,15 @@ void tick_input(GLFWwindow *window) {
         }
         if (ball1.position.x >= 7.5) {
           ball1.position.y -= 0.02;
-          // printf("LOl\n");
         }
         if (ball1.position.x >= 7.8 && ball1.position.y >= -3.0) {
           ball1.position.y -= 0.04;
-          // printf("LOl\n");
         }
       }
     }
     if (top) {
       counter = 0;
-      if (detect_collision(ball1.bounding_box(),hump.bounding_box()))
+      if (detect_collision(ball1.bounding_box(),hump.bounding_box())) // top button can't work
       {
         // ball1.position.y += 0.04;
       }
@@ -170,19 +192,70 @@ void tick_input(GLFWwindow *window) {
       {
           ball1.position.y += 0.04;
       }
+      if(rightcounter>0)
+      {
+        rightcounter-=100;
+      }
+      if(leftcounter>0)
+      {
+        leftcounter-=100;
+      }
     }
     else if (!under_magnet_influence(ball1.bounding_box(),magnet.bounding_box())&&!detect_collision(ball1.bounding_box(),hump.bounding_box())) // this is gravity pulling down after the magnet has pulled the player up
     {
       if (ball1.position.y >= -3.0)
       {
           counter ++;
-          ball1.position.y -= counter*0.004;
-          printf("LOL\n");
+          ball1.position.y -= counter*0.004;//gravity
+          if(rightcounter > 0)
+          {
+            platform.position.x += 0.04;
+            ball1.position.x += 0.04;// change the ball's position so that it stays still but the rest is moving
+            pointx += 0.04;//change the point you are looking
+            if (detect_collision(ball1.bounding_box(),hump.bounding_box()))
+            {
+              ball1.position.y += 0.04;
+              if (ball1.position.x > 4.6 && ball1.position.x < 7.5) {
+                ball1.position.y -= 0.01;
+              }
+              if (ball1.position.x >= 7.5) {
+                ball1.position.y -= 0.02;
+              }
+              if (ball1.position.x >= 7.8 && ball1.position.y >= -3.0) {
+                ball1.position.y -= 0.04;
+              }
+            }
+            rightcounter--;
+          }
+          else if (leftcounter > 0)
+          {
+            ball1.position.x -= 0.04;
+            platform.position.x -= 0.04;
+            pointx -= 0.04;
+            if (detect_collision(ball1.bounding_box(),hump.bounding_box()))
+            {
+              if (ball1.position.x <= 8.7) {
+                ball1.position.y += 0.04;
+              }
+              if (ball1.position.x <= 8.55) {
+                ball1.position.y -= 0.01;
+              }
+              if (ball1.position.x <= 6.9) {
+                ball1.position.y -= 0.01;
+              }
+              if (ball1.position.x <= 6.3) {
+                ball1.position.y -= 0.04;
+              }
+            }
+            leftcounter--;
+          }
       }
       else
       {
         ball1.position.y = -3.01;
         counter = 0;
+        rightcounter = 0;
+        leftcounter = 0;
       }
     }
 }
@@ -199,6 +272,11 @@ void tick_elements() {
     if ( Sfo1Start )
     {
       Sfo1.tick();
+      if(Sfo1.position.y >= -2.8)
+      {
+        Sfocounter++;
+        Sfo1.position.y -= Sfocounter*0.001;
+      }
     }
     for (int i=0; i<4; i++)
     {
@@ -212,7 +290,57 @@ void tick_elements() {
     fireline1201.tick();
     doublebeam.tick();
     boomerang.tick();
+    smarten.tick();
+    for(int i=0;i<2;i++)
+    {
+      if(shoot[i]==1)
+      {
+        rocket[i].tick();
+        // printf("SHot%d\n",i);
+        shoot[i]=1;
+      }
+      else if(((ball1.position.x > 29)&&(i==currentRocket)&&(rocketCounter < 0)&&(ball1.position.x < 34))) {
+        currentRocket++;
+        shoot[i]=1;
+        rocket[i].tick();
+      }
+      if((ball1.position.x > 29)&&(rocketCounter < 0)&&(ball1.position.x < 34))
+      {
+        rocketCounter = 200;
+      }
+      // printf("%d--rocket\n",rocketCounter);
+      rocketCounter--;
+    }
+    for(int i=0;i<2;i++) // for right rocket
+    {
+      if(shootRight[i]==1)
+      {
+        rocketRight[i].tick();
+        shootRight[i]=1;
+      }
+      else if(((ball1.position.x > 34)&&(i==currentRocketRight)&&(rocketRightCounter < 0))) {
+        currentRocketRight++;
+        shootRight[i]=1;
+        rocketRight[i].tick();
+      }
+      if((ball1.position.x > 34)&&(rocketRightCounter < 0))
+      {
+        rocketRightCounter = 200;
+      }
+      rocketRightCounter--;
+    }
     camera_rotation_angle += 1;
+    for(int i=0;i<2;i++)
+    {
+      if(shoot[i]==0)
+      {
+        rocket[i].position.y = smarten.position.y;
+      }
+      if(shootRight[i]==0)
+      {
+        rocketRight[i].position.y = smarten.position.y;
+      }
+    }
     for (int i=0; i<4; i++)
     {
       if(detect_collision(ball1.bounding_box(),coins[i].bounding_box())) // coins yellow
@@ -229,31 +357,47 @@ void tick_elements() {
         ball1.score += 10;
       }
     }
+    for (int i=0; i<2;i++)
+    {
+      if(detect_collision(ball1.bounding_box(),rocket[i].bounding_box())&&rocket[i].position.x!=32.75)
+      {
+        rocket[i].set_position(-100,-100);
+        ball1.lives--;
+      }
+    }
+    for (int i=0; i<2;i++)
+    {
+      if(detect_collision(ball1.bounding_box(),rocketRight[i].bounding_box())&&rocketRight[i].position.x!=33.25)
+      {
+        rocketRight[i].set_position(-100,-100);
+        ball1.lives--;
+      }
+    }
     if(under_magnet_influence(ball1.bounding_box(),magnet.bounding_box())) // magnet
     {
       if (magnet.position.x > ball1.position.x )
       {
         // ball1.position.x += 0.003;
-        ball1.speedx += 0.001;
+        ball1.speedx += 0.0001;
         pointx += ball1.speedx;
       }
       else if (magnet.position.x < ball1.position.x )
       {
         // ball1.position.x -= 0.003;
-        ball1.speedx -= 0.001;
+        ball1.speedx -= 0.0001;
         pointx -= ball1.speedx;
       }
       if (magnet.position.y > ball1.position.y )
       {
         // ball1.position.y += 0.003;
-        platform.speedy += 0.001;
-        ball1.speedy += 0.001;
+        platform.speedy += 0.0001;
+        ball1.speedy += 0.0001;
       }
       else if (magnet.position.y < ball1.position.y )
       {
         // ball1.position.y -= 0.003;
-        platform.speedy -= 0.001;
-        ball1.speedy -= 0.001;
+        platform.speedy -= 0.0001;
+        ball1.speedy -= 0.0001;
       }
       if ( (abs(magnet.position.x - ball1.position.x)) <= magnetdisappear && (abs(magnet.position.y - ball1.position.y ) <= magnetdisappear))
       {
@@ -309,7 +453,6 @@ void tick_elements() {
       }
       else {
         fireline601.set_position(-100, -100);
-        // printf("Dead\n");
         ball1.lives--;
       }
     }
@@ -326,9 +469,9 @@ void tick_elements() {
     if (detect_collision(ball1.bounding_box(),hump.bounding_box()))
     {
       // ball1.position.y += 0.04;
-      printf("genie\n");
+      // printf("genie\n");
     }
-    if( boomerang.position.y < -3 ) {
+    if(boomerang.position.y < -3) {
       boomerang.speedx = 0;
       boomerang.speedy = 0;
       boomerang.accx = 0;
@@ -342,6 +485,24 @@ void tick_elements() {
       boomerang.set_position(-100,-100);
       ball1.lives--;
     }
+    if(smarten.position.y > ball1.position.y)
+    {
+      smarten.position.y -= 0.04;
+      if(smarten.position.y < -2.5)
+      {
+        smarten.position.y = -2.5;
+      }
+    }
+    else if (smarten.position.y == ball1.position.y)
+    {// do Nothing
+
+    }
+    else
+    {
+      smarten.position.y += 0.04;
+    }
+    // cout << ball1.position.x + ',' + ball1.position.y << endl;
+    printf("%f , %f\n", ball1.position.x, ball1.position.y);
 }
 
 
@@ -373,6 +534,15 @@ void initGL(GLFWwindow *window, int width, int height) {
     doublebeam = doubleFirebeam ( 20, -1, COLOR_RED);
     hump = Hump(7, -3.5 , COLOR_DARKGREY);
     boomerang = Boomerang(-3, 0, COLOR_RED);
+    smarten = Smarten(33, 0, COLOR_RED);
+    for(int i = 0; i<2; i++)
+    {
+      rocket[i] = Rocket(32.75,0,COLOR_RED);
+    }
+    for(int i = 0; i<2; i++)
+    {
+      rocketRight[i] = RocketRight(33.25,0,COLOR_RED);
+    }
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
     // Get a handle for our "MVP" uniform
@@ -404,7 +574,6 @@ int main(int argc, char **argv) {
     srand(time(0));
     int width  = 600;
     int height = 600;
-    // printf ("True");
     window = initGLFW(width, height);
 
     initGL (window, width, height);
@@ -419,7 +588,7 @@ int main(int argc, char **argv) {
             draw();
             // pointx += 0.005;
             // Swap Frame Buffer in double buffering
-            if (ball1.lives == -1)
+            if (ball1.lives < 0)
             {
               break;
             }
@@ -429,7 +598,7 @@ int main(int argc, char **argv) {
             glfwSetWindowTitle(window,stingy);
             tick_elements();
             tick_input(window);
-            printf("%f %f\n", ball1.position.x, ball1.position.y);
+            // printf("%f %f\n", ball1.position.x, ball1.position.y);
         }
         /*if (detect_collision(ball1, ball2))
         {

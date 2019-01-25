@@ -74,7 +74,7 @@ void Sfo::set_position(float x, float y) {
 void Sfo::tick() {
     // this->rotation += speed;
      this->position.x -= 0.02;
-     this->position.y -= 0.001*(this->position.x)*(this->position.x);
+     // this->position.y -= 0.001*(this->position.x)*(this->position.x);
 }
 
 bounding_box_t Sfo::bounding_box() {
