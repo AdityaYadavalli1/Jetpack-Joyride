@@ -120,7 +120,7 @@ void draw() {
     hump.draw(VP);
     boomerang.draw(VP);
     smarten.draw(VP);
-    for(int i = 0 ; i<2;i++)
+    for(int i=0;i<2;i++)
     {
       rocket[i].draw(VP);
       rocketRight[i].draw(VP);
