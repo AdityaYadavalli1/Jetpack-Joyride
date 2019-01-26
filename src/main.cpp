@@ -37,6 +37,7 @@ Boomerang boomerang;
 Hump hump;
 Smarten smarten;
 Sfo Sfo1;
+Sfo Sfo2;
 int counter = 0;
 int rightcounter = 0;
 int leftcounter = 0;
@@ -61,11 +62,15 @@ int rocketRightCounter = -1;
 int currentRocketRight = 0;
 int shootRight[2] = {0};
 int Sfocounter = 0;
+int Sfocounter2 = 0;
 int waterballoonActivate1 = 0;
 int waterballoonActivate2 = 0;
 int waterballooncounter1 = 0;
 int waterballooncounter2 = 0;
-// int ycordcoin = rand() % 7 - 3; // -3 to 3
+int fireline601l,fireline1201l, doublebeaml,Firebeam1l;
+int fireline601w,fireline1201w, doublebeamw,Firebeam1w;
+bool Sfo1Start = 0;
+bool Sfo2Start = 0;
 Timer t60(1.0 / 60);
 
 /* Render the scene with openGL */
@@ -121,6 +126,7 @@ void draw() {
     magnet.draw(VP);
     magnetdisappear = createrandformagnet();
     Sfo1.draw(VP);
+    Sfo2.draw(VP);
     Firebeam1.draw(VP);
     fireline601.draw(VP);
     fireline1201.draw(VP);
@@ -140,7 +146,7 @@ bool detect_collision(bounding_box_t a, bounding_box_t b) {
            (abs((a.y) - (b.y)) * 1 < (a.height + b.height));
 }
 bool under_magnet_influence(bounding_box_t player, bounding_box_t magnet) {
-    return (abs((player.x) - (magnet.x)) < (player.width  + magnet.width)*4) &&
+    return (abs((player.x) - (magnet.x)) < (player.width  + magnet.width)*3.5) &&
            (abs((player.y) - (magnet.y)) < (player.height + magnet.height)*4);
 }
 void tick_input(GLFWwindow *window) {
@@ -286,18 +292,39 @@ void tick_input(GLFWwindow *window) {
 void tick_elements() {
     ball1.tick();
     magnet.tick();
-    bool Sfo1Start = 0;
     if(ball1.position.x >= -1)
     {
       Sfo1Start = 1;
     }
     if ( Sfo1Start )
     {
-      Sfo1.tick();
       if(Sfo1.position.y >= -2.8)
       {
+        Sfo1.tick();
         Sfocounter++;
         Sfo1.position.y -= Sfocounter*0.001;
+      }
+      else
+      {
+        Sfo1.set_position(-100,-100);
+      }
+    }
+    if(ball1.position.x >= 27)
+    {
+      Sfo2Start = 1;
+    }
+    if ( Sfo2Start )
+    {
+      if(Sfo2.position.y >= -2.8)
+      {
+        Sfo2.tick();
+        Sfocounter2++;
+        Sfo2.position.y -= Sfocounter2*0.001;
+      }
+      else
+      {
+        // Sfo2.tick()
+        Sfo2.set_position(-100,-100);
       }
     }
     for (int i=0; i<4; i++)
@@ -321,12 +348,12 @@ void tick_elements() {
         // printf("SHot%d\n",i);
         shoot[i]=1;
       }
-      else if(((ball1.position.x > 29)&&(i==currentRocket)&&(rocketCounter < 0)&&(ball1.position.x < 34))) {
+      else if(((ball1.position.x > 30)&&(i==currentRocket)&&(rocketCounter < 0)&&(ball1.position.x < 36))) {
         currentRocket++;
         shoot[i]=1;
         rocket[i].tick();
       }
-      if((ball1.position.x > 29)&&(rocketCounter < 0)&&(ball1.position.x < 34))
+      if((ball1.position.x > 30)&&(rocketCounter < 0)&&(ball1.position.x < 36))
       {
         rocketCounter = 200;
       }
@@ -340,12 +367,12 @@ void tick_elements() {
         rocketRight[i].tick();
         shootRight[i]=1;
       }
-      else if(((ball1.position.x > 34)&&(i==currentRocketRight)&&(rocketRightCounter < 0))) {
+      else if(((ball1.position.x > 36)&&(i==currentRocketRight)&&(rocketRightCounter < 0))) {
         currentRocketRight++;
         shootRight[i]=1;
         rocketRight[i].tick();
       }
-      if((ball1.position.x > 34)&&(rocketRightCounter < 0))
+      if((ball1.position.x > 36)&&(rocketRightCounter < 0))
       {
         rocketRightCounter = 200;
       }
@@ -410,13 +437,11 @@ void tick_elements() {
       }
       else if (magnet.position.x < ball1.position.x )
       {
-        // ball1.position.x -= 0.003;
         ball1.speedx -= 0.0001;
         pointx -= ball1.speedx;
       }
       if (magnet.position.y > ball1.position.y )
       {
-        // ball1.position.y += 0.003;
         platform.speedy += 0.0001;
         ball1.speedy += 0.0001;
       }
@@ -440,7 +465,12 @@ void tick_elements() {
       Sfo1.set_position(-100, -100);
       ball1.score += 50;
     }
-    if (detect_collision(ball1.bounding_box(),fireline1201.bounding_box()))
+    if (detect_collision(ball1.bounding_box(),Sfo2.bounding_box()))
+    {
+      Sfo2.set_position(-100, -100);
+      ball1.lives += 2;
+    }
+    if (detect_collision(ball1.bounding_box(),fireline1201.bounding_box()) && fireline1201l < 0)
     {
       if ( ball1.position.x < 25.3 && ball1.position.y < -1.20 && ball1.position.x > 24.75 ) { // down 1 25 -1.5
         // Do nothing
@@ -461,13 +491,12 @@ void tick_elements() {
 
       }
       else {
-        fireline1201.set_position(-100, -100);
-        printf("Dead2\n");
+        fireline1201l = 300;
         ball1.lives--;
       }
 
     }
-    if (detect_collision(ball1.bounding_box(),fireline601.bounding_box()))
+    if (detect_collision(ball1.bounding_box(),fireline601.bounding_box()) && fireline601l < 0)
     {
       if (ball1.position.x > 14 && ball1.position.y > 0.22 && ball1.position.x < 15.2) {
         // Do Nothing
@@ -479,19 +508,19 @@ void tick_elements() {
         // Do Nothing
       }
       else {
-        fireline601.set_position(-100, -100);
         ball1.lives--;
+        fireline601l=300;
       }
     }
-    if (detect_collision(ball1.bounding_box(),doublebeam.bounding_box()))
+    if (detect_collision(ball1.bounding_box(),doublebeam.bounding_box())&&doublebeaml < 0)
     {
-      doublebeam.set_position(-100, -100);
       ball1.lives--;
+      doublebeaml = 300;
     }
-    if (detect_collision(ball1.bounding_box(),Firebeam1.bounding_box()))
+    if (detect_collision(ball1.bounding_box(),Firebeam1.bounding_box())&&Firebeam1l < 0)
     {
-      Firebeam1.set_position(-100, -100);
       ball1.lives--;
+      Firebeam1l = 300;
     }
     if (detect_collision(ball1.bounding_box(),hump.bounding_box()))
     {
@@ -500,18 +529,37 @@ void tick_elements() {
     }
     if (detect_collision(waterballoon[0].bounding_box(),fireline601.bounding_box()))
     {
-      waterballoon[0].set_position(-100,-100);
-      fireline601.set_position(-100,-100);
+
+      if(waterballoon[0].position.x!= ball1.position.x)
+      {
+        waterballoon[0].set_position(-100,-100);
+        fireline601.set_position(-100,-100);
+        fireline601w = 1;
+      }
     }
     if (detect_collision(waterballoon[0].bounding_box(),fireline1201.bounding_box()))
     {
-      waterballoon[0].set_position(-100,-100);
-      fireline1201.set_position(-100,-100);
+
+      if(waterballoon[0].position.x!= ball1.position.x)
+      {
+        waterballoon[0].set_position(-100,-100);
+        fireline1201.set_position(-100,-100);
+        fireline1201w = 1;
+      }
     }
     if (detect_collision(waterballoon[0].bounding_box(),Firebeam1.bounding_box()))
     {
+
+      if(waterballoon[0].position.x!= ball1.position.x)
+      {
+        waterballoon[0].set_position(-100,-100);
+        Firebeam1.set_position(-100,-100);
+        Firebeam1w = 1;
+      }
+    }
+    if (detect_collision(waterballoon[0].bounding_box(),doublebeam.bounding_box()))
+    {
       waterballoon[0].set_position(-100,-100);
-      Firebeam1.set_position(-100,-100);
     }
     if(boomerang.position.y < -3) {
       boomerang.speedx = 0;
@@ -556,6 +604,31 @@ void tick_elements() {
         waterballoon[0].set_position(-100,-100);
       }
     }
+    if(Firebeam1.position.x == -100 && Firebeam1w == 0)
+    {
+      // printf("Moving out of control\n");
+      Firebeam1.set_position(13, -3);
+    }
+    if(doublebeam.position.x == -100  && doublebeamw == 0)
+    {
+      // printf("Moving out of control\n");
+      doublebeam.set_position(20, -1);
+    }
+    if(fireline601.position.x == -100 && fireline601w == 0)
+    {
+      // printf("Moving out of control\n");
+      fireline601.set_position(15, -1);
+    }
+    if(fireline1201.position.x == -100 && fireline1201w == 0)
+    {
+      // printf("Moving out of control\n");
+      fireline1201.set_position(24, -1);
+    }
+    fireline1201l--;
+    fireline601l--;
+    Firebeam1l--;
+    doublebeaml--;
+    // firelinel--;
     // cout << ball1.position.x + ',' + ball1.position.y << endl;
     // printf("%f , %f\n", ball1.position.x, ball1.position.y);
     // printf("%f ,%f\n", waterballoon[0].position.x, waterballoon[0].position.y);
@@ -584,20 +657,21 @@ void initGL(GLFWwindow *window, int width, int height) {
     }
     magnet = Magnet(6, 2, COLOR_DARKGREY);
     Sfo1 = Sfo(4, 3, COLOR_WHITE);
+    Sfo2 = Sfo(30,3, COLOR_WHITE);
     Firebeam1 = Firebeam (13, -3, COLOR_RED);
     fireline601 = Firebeam60 ( 15, -1, COLOR_RED);
     fireline1201 = Firebeam120 ( 24, -1, COLOR_RED);
     doublebeam = doubleFirebeam ( 20, -1, COLOR_RED);
     hump = Hump(7, -3.5 , COLOR_DARKGREY);
     boomerang = Boomerang(-3, 0, COLOR_RED);
-    smarten = Smarten(33, 0, COLOR_RED);
+    smarten = Smarten(35, 0, COLOR_RED);
     for(int i = 0; i<2; i++)
     {
-      rocket[i] = Rocket(32.75,0,COLOR_RED);
+      rocket[i] = Rocket(34.75,0,COLOR_RED);
     }
     for(int i = 0; i<2; i++)
     {
-      rocketRight[i] = RocketRight(33.25,0,COLOR_RED);
+      rocketRight[i] = RocketRight(35.25,0,COLOR_RED);
     }
     for(int i = 0;i<1;i++)
     {
