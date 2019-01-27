@@ -28,7 +28,7 @@ GLFWwindow *window;
 * Customizable functions *
 **************************/
 
-Ball ball1;
+Ball ball1, ball2;
 Coins coins[4];
 Coins doublecoins[4];
 Magnet magnet;
@@ -71,6 +71,8 @@ int fireline601l,fireline1201l, doublebeaml,Firebeam1l;
 int fireline601w,fireline1201w, doublebeamw,Firebeam1w;
 bool Sfo1Start = 0;
 bool Sfo2Start = 0;
+bool gameOver = 0;
+// bool lost = 0;
 Timer t60(1.0 / 60);
 
 /* Render the scene with openGL */
@@ -114,6 +116,7 @@ void draw() {
     // waterballoon[1].draw(VP);
     waterballoon[0].draw(VP);
     ball1.draw(VP);
+    ball2.draw(VP);
     platform.draw(VP);
     for (int i=0; i<4; i++)
     {
@@ -624,6 +627,10 @@ void tick_elements() {
       // printf("Moving out of control\n");
       fireline1201.set_position(24, -1);
     }
+    if(detect_collision(ball1.bounding_box(),ball2.bounding_box()))
+    {
+      gameOver = 1;
+    }
     fireline1201l--;
     fireline601l--;
     Firebeam1l--;
@@ -642,6 +649,7 @@ void initGL(GLFWwindow *window, int width, int height) {
     // Create the models
     // int ycordcoin = createrandforcoin();
     ball1         = Ball(-4, -2, COLOR_ORANGE);
+    ball2         = Ball(40, -2, COLOR_GREEN);
     platform      = Platform(0, -5.5, COLOR_DARKGREY);
     int start = -2;
     int doublestart = 8;
@@ -719,15 +727,29 @@ int main(int argc, char **argv) {
         if (t60.processTick()) {
             // 60 fps
             // OpenGL Draw commands
-            draw();
+            if(gameOver == 0|| ball1.lives >=0)
+            {
+              draw();
+            }
             // pointx += 0.005;
             // Swap Frame Buffer in double buffering
-            if (ball1.lives < 0)
-            {
-              break;
-            }
+            // if (ball1.lives < 0)
+            // {
+            //   break;
+            // }
             char stingy[100];
-            sprintf(stingy,"Score is %d and lives left is %d",ball1.score,ball1.lives);
+            if(gameOver == 1)
+            {
+              sprintf(stingy,"Game Over, You won");
+            }
+            else if (ball1.lives < 0)
+            {
+              sprintf(stingy,"Game Over, You lost");
+            }
+            else
+            {
+              sprintf(stingy,"Score is %d and lives left is %d",ball1.score,ball1.lives);
+            }
             glfwSwapBuffers(window);
             glfwSetWindowTitle(window,stingy);
             tick_elements();
