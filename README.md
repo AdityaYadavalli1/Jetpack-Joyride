@@ -2,7 +2,7 @@ Jetpack Joyride
 =========================
 This is a replica of the famous arcade game - Jetpack Joyride using OpenGL.
 
-This code is adapted from [here](https://github.com/meghprkh/graphics-boilerplate).
+This repository is a mirror of [this](https://gitlab.com/AdityaYadavalli/jetpack.git). Please don't hesitate to raise any issues/questions there. 
 
 ## To run
 
@@ -14,4 +14,4 @@ This code is adapted from [here](https://github.com/meghprkh/graphics-boilerplat
 **Note:** In case of Experimental Error for GLM.
 add "#define GLM_ENABLE_EXPERIMENTAL" in the files main.h nonedit.cpp other_handlers.cpp and input.cpp, before you include glm.
 
-**Cheers! Have Fun** 
+**Cheers! Have Fun**
